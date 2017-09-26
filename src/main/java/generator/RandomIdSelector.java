@@ -26,11 +26,15 @@ public class RandomIdSelector {
     }
 
     public long[] getKFromN(int k, long n) {
+        return getKFromNStartFrom(k, n, 1);
+    }
+
+    public long[] getKFromNStartFrom(int k, long n, long starting) {
         long[] result = new long[k];
         int cnt = 0;
         HashSet<Long> values = new HashSet<Long>();
         while (cnt < k) {
-            long val = ((long) (random.nextDouble() * (n + 1)));
+            long val = (long)(random.nextDouble() * n + starting);
             if (values.contains(val)) {
                 continue;
             }

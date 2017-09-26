@@ -50,14 +50,22 @@ public class XMLUtil {
     final static String HOST = "host";
     final static String PATH = "path";
     final static String GBOOK_USERS = "gleambook.users.count";
+    final static String GBOOK_USERS_STARTID = "gleambook.users.startid";
+    final static String GBOOK_MESSAGES_STARTID = "gleambook.messages.startid";
     final static String CHIRP_USERS = "chirp.users.count";
+    final static String CHIRP_USERS_STARTID = "chirp.users.startid";
+    final static String CHIRP_MESSAGES_STARTID = "chirp.messages.startid";
     final static String SEED = "seed";
+    final static String GBOOK_USER_KEY_GLOBAL_START = "gbook.users.key.globalstart";
     final static String GBOOK_USER_KEY_MIN = "gbook.users.key.min";
     final static String GBOOK_USER_KEY_MAX = "gbook.users.key.max";
+    final static String CHIRP_USER_KEY_GLOBAL_START = "chirp.users.key.globalstart";
     final static String CHIRP_USER_KEY_MIN = "chirp.users.key.min";
     final static String CHIRP_USER_KEY_MAX = "chirp.users.key.max";
+    final static String GBOOK_MSG_KEY_GLOBAL_START = "gbook.messages.key.globalstart";
     final static String GBOOK_MSG_KEY_MIN = "gbook.messages.key.min";
     final static String GBOOK_MSG_KEY_MAX = "gbook.messages.key.max";
+    final static String CHIRP_MSG_KEY_GLOBAL_START = "chirp.messages.key.globalstart";
     final static String CHIRP_MSG_KEY_MIN = "chirp.messages.key.min";
     final static String CHIRP_MSG_KEY_MAX = "chirp.messages.key.max";
     final static String AVG_MSG_PER_GBOOK_USER = "avg.message.count.per.gleambook.user";
@@ -114,9 +122,10 @@ public class XMLUtil {
 
     public static Configuration getConfiguration(String filePath) throws Exception {
         Configuration conf = getConfiguration(getDocument(filePath));
-        PartitionMetrics metrics = new PartitionMetrics(conf.getSeed(), conf.getNumOfGBookUsers(),
-                conf.getNumOfChirpUsers(), conf.getAvgMsgGBookUser(), conf.getAvgMsgChirpUser(),
-                conf.getSourcePartitions().size());
+        PartitionMetrics metrics = new PartitionMetrics(conf.getSeed(),
+                conf.getStartIdOfGBookUsers(), conf.getStartIdOfGBookMessages(), conf.getNumOfGBookUsers(),
+                conf.getStartIdOfChirpUsers(), conf.getStartIdOfChirpMessages(), conf.getNumOfChirpUsers(),
+                conf.getAvgMsgGBookUser(), conf.getAvgMsgChirpUser(), conf.getSourcePartitions().size());
         List<TargetPartition> targetPartitions = getTargetPartitions(metrics, conf.getSourcePartitions());
         conf.setTargetPartitions(targetPartitions);
         return conf;
@@ -126,13 +135,18 @@ public class XMLUtil {
         Element rootEle = document.getDocumentElement();
         NodeList nodeList = rootEle.getChildNodes();
         long seed = Long.parseLong(getStringValue((Element) nodeList, SEED));
+        long gBookUserStardId = Long.parseLong(getStringValue((Element) nodeList, GBOOK_USERS_STARTID));
+        long gBookMessageStardId = Long.parseLong(getStringValue((Element) nodeList, GBOOK_MESSAGES_STARTID));
         long gBookUserCount = Long.parseLong(getStringValue((Element) nodeList, GBOOK_USERS));
+        long chirpUserStardId = Long.parseLong(getStringValue((Element) nodeList, CHIRP_USERS_STARTID));
+        long chirpMessageStardId = Long.parseLong(getStringValue((Element) nodeList, CHIRP_MESSAGES_STARTID));
         long chirpUserCount = Long.parseLong(getStringValue((Element) nodeList, CHIRP_USERS));
         int avgMsgPerGBookUser = Integer.parseInt(getStringValue((Element) nodeList, AVG_MSG_PER_GBOOK_USER));
         int avgMsgPerChirpUser = Integer.parseInt(getStringValue((Element) nodeList, AVG_MSG_PER_CHIRP_USER));
         List<SourcePartition> sourcePartitions = getSourcePartitions(document);
-        return new Configuration(seed, gBookUserCount, chirpUserCount, avgMsgPerGBookUser, avgMsgPerChirpUser,
-                sourcePartitions);
+        return new Configuration(seed, gBookUserStardId, gBookMessageStardId, gBookUserCount,
+                chirpUserStardId, chirpMessageStardId, chirpUserCount,
+                avgMsgPerGBookUser, avgMsgPerChirpUser, sourcePartitions);
     }
 
     private static List<SourcePartition> getSourcePartitions(Document document) {
@@ -185,12 +199,16 @@ public class XMLUtil {
             String host = getStringValue(nodeElement, HOST);
             String path = getStringValue(nodeElement, PATH);
 
+            String gBookUserKeyGlobalStart = getStringValue(nodeElement, GBOOK_USER_KEY_GLOBAL_START);
             String gBookUserKeyMin = getStringValue(nodeElement, GBOOK_USER_KEY_MIN);
             String gBUserKeyMax = getStringValue(nodeElement, GBOOK_USER_KEY_MAX);
+            String chirpUserKeyGlobalStart = getStringValue(nodeElement, CHIRP_USER_KEY_GLOBAL_START);
             String chirpUserKeyMin = getStringValue(nodeElement, CHIRP_USER_KEY_MIN);
             String chirpUserKeyMax = getStringValue(nodeElement, CHIRP_USER_KEY_MAX);
+            String gBookMsgKeyGlobalStart = getStringValue(nodeElement, GBOOK_MSG_KEY_GLOBAL_START);
             String gBookMsgKeyMin = getStringValue(nodeElement, GBOOK_MSG_KEY_MIN);
             String gBookMsgKeyMax = getStringValue(nodeElement, GBOOK_MSG_KEY_MAX);
+            String chirpMsgKeyGlobalStart = getStringValue(nodeElement, CHIRP_MSG_KEY_GLOBAL_START);
             String chirpMsgKeyMin = getStringValue(nodeElement, CHIRP_MSG_KEY_MIN);
             String chirpMsgKeyMax = getStringValue(nodeElement, CHIRP_MSG_KEY_MAX);
             String avgMsgPerGBookUser = getStringValue(nodeElement, AVG_MSG_PER_GBOOK_USER);
@@ -199,11 +217,12 @@ public class XMLUtil {
 
             SourcePartition sp = new SourcePartition(id, host, path);
 
-            TargetPartition tp = new TargetPartition(id, host, path, Long.parseLong(gBookUserKeyMin),
-                    Long.parseLong(gBUserKeyMax), Long.parseLong(chirpUserKeyMin), Long.parseLong(chirpUserKeyMax),
-                    Long.parseLong(gBookMsgKeyMin), Long.parseLong(gBookMsgKeyMax), Long.parseLong(chirpMsgKeyMin),
-                    Long.parseLong(chirpMsgKeyMax), Integer.parseInt(avgMsgPerGBookUser),
-                    Integer.parseInt(avgMsgPerChirpUser), Long.parseLong(seed));
+            TargetPartition tp = new TargetPartition(id, host, path,
+                    Long.parseLong(gBookUserKeyGlobalStart), Long.parseLong(gBookUserKeyMin), Long.parseLong(gBUserKeyMax),
+                    Long.parseLong(chirpUserKeyGlobalStart), Long.parseLong(chirpUserKeyMin), Long.parseLong(chirpUserKeyMax),
+                    Long.parseLong(gBookMsgKeyGlobalStart), Long.parseLong(gBookMsgKeyMin), Long.parseLong(gBookMsgKeyMax),
+                    Long.parseLong(chirpMsgKeyGlobalStart), Long.parseLong(chirpMsgKeyMin), Long.parseLong(chirpMsgKeyMax),
+                    Integer.parseInt(avgMsgPerGBookUser), Integer.parseInt(avgMsgPerChirpUser), Long.parseLong(seed));
             PartitionConfiguration pc = new PartitionConfiguration(sp, tp);
             return pc;
         }
@@ -213,10 +232,10 @@ public class XMLUtil {
     private static List<TargetPartition> getTargetPartitions(PartitionMetrics metrics,
             List<SourcePartition> sourcePartitions) {
         List<TargetPartition> partitions = new ArrayList<TargetPartition>();
-        long gBookUserKeyMin = 1;
-        long chirpUserKeyMin = 1;
-        long gBookMsgIdMin = 1;
-        long chirpMsgIdMin = 1;
+        long gBookUserKeyMin = metrics.getGlobalStartIdOfGBookUsers();
+        long chirpUserKeyMin = metrics.getGlobalStartIdOfChirpUsers();
+        long gBookMsgIdMin = metrics.getGlobalStartIdOfGBookMessages();
+        long chirpMsgIdMin = metrics.getGlobalStartIdOfChirpMessages();
         int avgMsgPerGBookUser = metrics.getAvgMsgPerGBookUser();
         int avgMsgPerChirpUser = metrics.getAvgMsgPerChirpUser();
 
@@ -230,9 +249,12 @@ public class XMLUtil {
 
             long gBookMsgIdMax = gBookMsgIdMin + maxPossibleGBookMsgs - 1;
             long chirpMsgIdMax = chirpMsgIdMin + maxPossibleChirpMsgs - 1;
-            TargetPartition pe = new TargetPartition(sp.getId(), sp.getHost(), sp.getPath(), gBookUserKeyMin,
-                    gBookUserKeyMax, chirpUserKeyMin, chirpUserKeyMax, gBookMsgIdMin, gBookMsgIdMax, chirpMsgIdMin,
-                    chirpMsgIdMax, avgMsgPerGBookUser, avgMsgPerChirpUser, partitionSeed);
+            TargetPartition pe = new TargetPartition(sp.getId(), sp.getHost(), sp.getPath(),
+                    metrics.getGlobalStartIdOfGBookUsers(), gBookUserKeyMin, gBookUserKeyMax,
+                    metrics.getGlobalStartIdOfChirpUsers(), chirpUserKeyMin, chirpUserKeyMax,
+                    metrics.getGlobalStartIdOfGBookMessages(), gBookMsgIdMin, gBookMsgIdMax,
+                    metrics.getGlobalStartIdOfChirpMessages(), chirpMsgIdMin, chirpMsgIdMax,
+                    avgMsgPerGBookUser, avgMsgPerChirpUser, partitionSeed);
             partitions.add(pe);
 
             gBookUserKeyMin = gBookUserKeyMax + 1;
@@ -267,6 +289,10 @@ public class XMLUtil {
         seed.appendChild(doc.createTextNode("" + partition.getSeed()));
         pe.appendChild(seed);
 
+        Element gBookUserKeyGlobalStart = doc.createElement(GBOOK_USER_KEY_GLOBAL_START);
+        gBookUserKeyGlobalStart.appendChild(doc.createTextNode("" + partition.getGlobalStartIdOfGBookUsers()));
+        pe.appendChild(gBookUserKeyGlobalStart);
+
         Element gBookUserKeyMin = doc.createElement(GBOOK_USER_KEY_MIN);
         gBookUserKeyMin.appendChild(doc.createTextNode("" + partition.getgBookUserKeyMin()));
         pe.appendChild(gBookUserKeyMin);
@@ -274,6 +300,10 @@ public class XMLUtil {
         Element gBookUserKeyMax = doc.createElement(GBOOK_USER_KEY_MAX);
         gBookUserKeyMax.appendChild(doc.createTextNode("" + partition.getgBookUserKeyMax()));
         pe.appendChild(gBookUserKeyMax);
+
+        Element chirpUserKeyGlobalStart = doc.createElement(CHIRP_USER_KEY_GLOBAL_START);
+        chirpUserKeyGlobalStart.appendChild(doc.createTextNode("" + partition.getGlobalStartIdOfChirpUsers()));
+        pe.appendChild(chirpUserKeyGlobalStart);
 
         Element chirpUserKeyMin = doc.createElement(CHIRP_USER_KEY_MIN);
         chirpUserKeyMin.appendChild(doc.createTextNode("" + partition.getChirpUserKeyMin()));
@@ -283,6 +313,10 @@ public class XMLUtil {
         chirpUserKeyMax.appendChild(doc.createTextNode("" + partition.getChirpUserKeyMax()));
         pe.appendChild(chirpUserKeyMax);
 
+        Element gBookMsgKeyGlobalStart = doc.createElement(GBOOK_MSG_KEY_GLOBAL_START);
+        gBookMsgKeyGlobalStart.appendChild(doc.createTextNode("" + partition.getGlobalStartIdOfGBookMessages()));
+        pe.appendChild(gBookMsgKeyGlobalStart);
+
         Element gBookMsgKeyMin = doc.createElement(GBOOK_MSG_KEY_MIN);
         gBookMsgKeyMin.appendChild(doc.createTextNode("" + partition.getGBookMsgIdMin()));
         pe.appendChild(gBookMsgKeyMin);
@@ -290,6 +324,10 @@ public class XMLUtil {
         Element gBookMsgKeyMax = doc.createElement(GBOOK_MSG_KEY_MAX);
         gBookMsgKeyMax.appendChild(doc.createTextNode("" + partition.getGBookMsgIdMax()));
         pe.appendChild(gBookMsgKeyMax);
+
+        Element chirpMsgKeyGlobalStart = doc.createElement(CHIRP_MSG_KEY_GLOBAL_START);
+        chirpMsgKeyGlobalStart.appendChild(doc.createTextNode("" + partition.getGlobalStartIdOfChirpMessages()));
+        pe.appendChild(chirpMsgKeyGlobalStart);
 
         Element chirpMsgKeyMin = doc.createElement(CHIRP_MSG_KEY_MIN);
         chirpMsgKeyMin.appendChild(doc.createTextNode("" + partition.getChirpMsgIdMin()));

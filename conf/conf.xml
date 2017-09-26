@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Dbgen>
-<gleambook.users.count>10000000</gleambook.users.count>
-<chirp.users.count>10000000</chirp.users.count>
+<gleambook.users.startid>100</gleambook.users.startid>
+<gleambook.messages.startid>200</gleambook.messages.startid>
+<gleambook.users.count>100</gleambook.users.count>
+<chirp.users.startid>300</chirp.users.startid>
+<chirp.messages.startid>400</chirp.messages.startid>
+<chirp.users.count>100</chirp.users.count>
 <avg.message.count.per.gleambook.user>5</avg.message.count.per.gleambook.user>
 <avg.message.count.per.chirp.user>10</avg.message.count.per.chirp.user>
 <seed>10</seed>
@@ -67,7 +71,6 @@
 <host>localhost</host>
 <path>/workspace/bigfundata/p10</path>
 </partition>
-
 
 <partition>
 <id>11</id>

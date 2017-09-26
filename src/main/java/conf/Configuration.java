@@ -19,7 +19,11 @@ import java.util.List;
 
 public class Configuration {
 
+    private final long startIdOfGBookUsers;
+    private final long startIdOfGBookMessages;
     private final long numOfGBookUsers;
+    private final long startIdOfChirpUsers;
+    private final long startIdOfChirpMessages;
     private final long numOfChirpUsers;
     private final int avgMsgPerGBookUser;
     private final int avgMsgPerChirpUser;
@@ -28,15 +32,28 @@ public class Configuration {
     private final List<SourcePartition> sourcePartitions;
     private List<TargetPartition> targetPartitions;
 
-    public Configuration(long seed, long numOfGBookUsers, long numOfChirpUsers, int avgMsgGBookUser,
-            int avgMsgChirpUser, List<SourcePartition> partitions) throws IOException {
+    public Configuration(long seed, long startIdOfGBookUsers, long startIdOfGBookMessages, long numOfGBookUsers,
+                         long startIdOfChirpUsers, long startIdOfChirpMessages, long numOfChirpUsers,
+                         int avgMsgGBookUser, int avgMsgChirpUser, List<SourcePartition> partitions) throws IOException {
         this.seed = seed;
+        this.startIdOfGBookUsers = startIdOfGBookUsers;
+        this.startIdOfGBookMessages = startIdOfGBookMessages;
         this.numOfGBookUsers = numOfGBookUsers;
+        this.startIdOfChirpUsers = startIdOfChirpUsers;
+        this.startIdOfChirpMessages = startIdOfChirpMessages;
         this.numOfChirpUsers = numOfChirpUsers;
         this.avgMsgPerGBookUser = avgMsgGBookUser;
         this.avgMsgPerChirpUser = avgMsgChirpUser;
         this.sourcePartitions = partitions;
     }
+
+    public long getStartIdOfGBookUsers() { return startIdOfGBookUsers; }
+
+    public long getStartIdOfGBookMessages() {return startIdOfGBookMessages; }
+
+    public long getStartIdOfChirpUsers() { return startIdOfChirpUsers; }
+
+    public long getStartIdOfChirpMessages() {return startIdOfChirpMessages; }
 
     public long getNumOfGBookUsers() {
         return numOfGBookUsers;

@@ -15,33 +15,45 @@
 package conf;
 
 public class TargetPartition {
+
     private final long id;
     private final String host;
     private final String path;
+    private final long globalStartIdOfGBookUsers;
     private final long gBookUserKeyMin;
     private final long gBookUserKeyMax;
+    private final long globalStartIdOfChirpUsers;
     private final long chirpUserKeyMin;
     private final long chirpUserKeyMax;
+    private final long globalStartIdOfGBookMessages;
     private final long gBookMsgIdMin;
     private final long gBookMsgIdMax;
+    private final long globalStartIdOfChirpMessages;
     private final long chirpMsgIdMin;
     private final long chirpMsgIdMax;
     private final int avgMsgPerGBookUser;
     private final int avgMsgPerChirpUser;
     private final long seed;
 
-    public TargetPartition(long id, String host, String path, long gBookUserKeyMin, long gBookUserKeyMax,
-            long chirpUserKeyMin, long chirpUserKeyMax, long gBookMsgIdMin, long gBookMsgIdMax, long chirpMsgIdMin,
-            long chirpMsgIdMax, int avgMsgPerGBookUser, int avgChirpMsgPerUser, long seed) {
+    public TargetPartition(long id, String host, String path,
+                           long globalStartIdOfGBookUsers, long gBookUserKeyMin, long gBookUserKeyMax,
+                           long globalStartIdOfChirpUsers, long chirpUserKeyMin, long chirpUserKeyMax,
+                           long globalStartIdOfGBookMessages, long gBookMsgIdMin, long gBookMsgIdMax,
+                           long globalStartIdOfChirpMessages, long chirpMsgIdMin, long chirpMsgIdMax,
+                           int avgMsgPerGBookUser, int avgChirpMsgPerUser, long seed) {
         this.id = id;
         this.host = host;
         this.path = path;
+        this.globalStartIdOfGBookUsers = globalStartIdOfGBookUsers;
         this.gBookUserKeyMin = gBookUserKeyMin;
         this.gBookUserKeyMax = gBookUserKeyMax;
+        this.globalStartIdOfChirpUsers = globalStartIdOfChirpUsers;
         this.chirpUserKeyMin = chirpUserKeyMin;
         this.chirpUserKeyMax = chirpUserKeyMax;
+        this.globalStartIdOfChirpMessages = globalStartIdOfChirpMessages;
         this.chirpMsgIdMin = chirpMsgIdMin;
         this.chirpMsgIdMax = chirpMsgIdMax;
+        this.globalStartIdOfGBookMessages = globalStartIdOfGBookMessages;
         this.gBookMsgIdMin = gBookMsgIdMin;
         this.gBookMsgIdMax = gBookMsgIdMax;
         this.avgMsgPerGBookUser = avgMsgPerGBookUser;
@@ -57,6 +69,8 @@ public class TargetPartition {
         return host;
     }
 
+    public long getGlobalStartIdOfGBookUsers() { return globalStartIdOfGBookUsers; }
+
     public long getgBookUserKeyMin() {
         return gBookUserKeyMin;
     }
@@ -64,6 +78,8 @@ public class TargetPartition {
     public long getgBookUserKeyMax() {
         return gBookUserKeyMax;
     }
+
+    public long getGlobalStartIdOfChirpUsers() { return globalStartIdOfChirpUsers; }
 
     public long getChirpUserKeyMin() {
         return chirpUserKeyMin;
@@ -73,6 +89,8 @@ public class TargetPartition {
         return chirpUserKeyMax;
     }
 
+    public long getGlobalStartIdOfGBookMessages() { return globalStartIdOfGBookMessages; }
+
     public long getGBookMsgIdMin() {
         return gBookMsgIdMin;
     }
@@ -80,6 +98,8 @@ public class TargetPartition {
     public long getGBookMsgIdMax() {
         return gBookMsgIdMax;
     }
+
+    public long getGlobalStartIdOfChirpMessages() { return globalStartIdOfChirpMessages; }
 
     public long getChirpMsgIdMin() {
         return chirpMsgIdMin;

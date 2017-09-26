@@ -85,8 +85,12 @@ public class DataGenerator {
     private static RandomLocationGenerator randLocationGen;
     private static RandomIdSelector randIdSelector;
     private static Random random;
+    private static long globalStartIdOfGBookUsers;
     private static long numOfGBookUsers;
+    private static long globalStartIdOfChirpUsers;
     private static long numOfChirpUsers;
+    private static long globalStartIdOfGBookMessages;
+    private static long globalStartIdOfChirpMessages;
     private static int avgMsgPerGBookUser;
     private static int avgMsgPerChirpUser;
     private static long gBookUserId;
@@ -132,7 +136,8 @@ public class DataGenerator {
             Point location = randLocationGen.getRandomPoint();
             DateTime sendTime = randDateGen.getNextRandomDatetime();
             gBookMessage.reset(gBookMsgId++, user.getId(),
-                    generateRandomLong(1, (numOfGBookUsers * avgMsgPerGBookUser)), location, sendTime, message);
+                    generateRandomLong(globalStartIdOfGBookMessages, globalStartIdOfGBookMessages + (numOfGBookUsers * avgMsgPerGBookUser)),
+                    location, sendTime, message);
             appender.appendToFile(visitor.reset().visit(gBookMessage).toString());
         }
     }
@@ -178,6 +183,12 @@ public class DataGenerator {
         randIdSelector = new RandomIdSelector(seed);
         String parentDir = controllerInstallDir + "/metadata";
         randMessageGen = new RandomMessageGenerator(msgGenConfigFile, parentDir, seed);
+
+        globalStartIdOfGBookUsers = partition.getTargetPartition().getGlobalStartIdOfGBookUsers();
+        globalStartIdOfChirpUsers = partition.getTargetPartition().getGlobalStartIdOfChirpUsers();
+        globalStartIdOfGBookMessages = partition.getTargetPartition().getGlobalStartIdOfGBookMessages();
+        globalStartIdOfChirpMessages = partition.getTargetPartition().getGlobalStartIdOfChirpMessages();
+
         numOfGBookUsers = (partition.getTargetPartition().getgBookUserKeyMax()
                 - partition.getTargetPartition().getgBookUserKeyMin()) + 1;
         numOfChirpUsers = (partition.getTargetPartition().getChirpUserKeyMax()
@@ -286,7 +297,7 @@ public class DataGenerator {
         String alias = getUniqueAlias(nameComponents[0], id, MAX_DIGIT);
         DateTime userSince = randDateGen.getNextRandomDatetime();
         int numFriends = random.nextInt(11);
-        long[] friendIds = randIdSelector.getKFromN(numFriends, (numOfGBookUsers));
+        long[] friendIds = randIdSelector.getKFromNStartFrom(numFriends, (numOfGBookUsers), (globalStartIdOfGBookUsers));
         int empCount = 1 + random.nextInt(3);
         Employments emp = new Employments(empCount);
         for (int i = 0; i < empCount; i++) {
