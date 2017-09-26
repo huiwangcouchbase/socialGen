@@ -209,7 +209,7 @@ public class DataGenerator {
         partitionStartIdOfChirpMessages = partition.getTargetPartition().getChirpMsgIdMin();
 
         outputDir = partition.getSourcePartition().getPath();
-
+        System.out.println("start generating");
         generateData(od.visitor, od.extension);
     }
 
@@ -291,7 +291,9 @@ public class DataGenerator {
     }
 
     private static void generateData(IAppendVisitor visitor, String extension) throws IOException {
+        System.out.println("generating number of gbook user " + numOfGBookUsers);
         generateGbookUsers(numOfGBookUsers, visitor, extension);
+        System.out.println("generating number of chirp user " + numOfGBookUsers);
         generateChirpUsers(numOfChirpUsers, visitor, extension);
         System.out.println("\nData generation in partition " + partition.getTargetPartition().getId() + " finished");
     }
