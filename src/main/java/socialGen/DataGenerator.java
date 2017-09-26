@@ -86,11 +86,15 @@ public class DataGenerator {
     private static RandomIdSelector randIdSelector;
     private static Random random;
     private static long globalStartIdOfGBookUsers;
+    private static long partitionStartIdOfGBookUsers;
     private static long numOfGBookUsers;
     private static long globalStartIdOfChirpUsers;
+    private static long partitionStartIdOfChirpUsers;
     private static long numOfChirpUsers;
     private static long globalStartIdOfGBookMessages;
+    private static long partitionStartIdOfGBookMessages;
     private static long globalStartIdOfChirpMessages;
+    private static long partitionStartIdOfChirpMessages;
     private static int avgMsgPerGBookUser;
     private static int avgMsgPerChirpUser;
     private static long gBookUserId;
@@ -136,7 +140,7 @@ public class DataGenerator {
             Point location = randLocationGen.getRandomPoint();
             DateTime sendTime = randDateGen.getNextRandomDatetime();
             gBookMessage.reset(gBookMsgId++, user.getId(),
-                    generateRandomLong(globalStartIdOfGBookMessages, globalStartIdOfGBookMessages + (numOfGBookUsers * avgMsgPerGBookUser)),
+                    generateRandomLong(partitionStartIdOfGBookMessages, partitionStartIdOfGBookMessages + (numOfGBookUsers * avgMsgPerGBookUser)),
                     location, sendTime, message);
             appender.appendToFile(visitor.reset().visit(gBookMessage).toString());
         }
@@ -198,6 +202,12 @@ public class DataGenerator {
         gBookUserId = partition.getTargetPartition().getgBookUserKeyMin();
         gBookMsgId = partition.getTargetPartition().getGBookMsgIdMin();
         chirpMsgId = partition.getTargetPartition().getChirpMsgIdMin();
+
+        partitionStartIdOfGBookUsers = partition.getTargetPartition().getgBookUserKeyMin();
+        partitionStartIdOfChirpUsers = partition.getTargetPartition().getChirpUserKeyMin();
+        partitionStartIdOfGBookMessages = partition.getTargetPartition().getGBookMsgIdMin();
+        partitionStartIdOfChirpMessages = partition.getTargetPartition().getChirpMsgIdMin();
+
         outputDir = partition.getSourcePartition().getPath();
 
         generateData(od.visitor, od.extension);
@@ -297,7 +307,7 @@ public class DataGenerator {
         String alias = getUniqueAlias(nameComponents[0], id, MAX_DIGIT);
         DateTime userSince = randDateGen.getNextRandomDatetime();
         int numFriends = random.nextInt(11);
-        long[] friendIds = randIdSelector.getKFromNStartFrom(numFriends, (numOfGBookUsers), (globalStartIdOfGBookUsers));
+        long[] friendIds = randIdSelector.getKFromNStartFrom(numFriends, (numOfGBookUsers), (partitionStartIdOfGBookUsers));
         int empCount = 1 + random.nextInt(3);
         Employments emp = new Employments(empCount);
         for (int i = 0; i < empCount; i++) {
