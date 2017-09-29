@@ -112,24 +112,33 @@ public class DataGenerator {
     private static void generateGbookUsers(long numGBookUsers, IAppendVisitor visitor, String ext) throws IOException {
         FileAppender appender = FileUtil.getFileAppender(outputDir + "/" + "gbook_users." + ext, true, true);
         FileAppender messageAppender = FileUtil.getFileAppender(outputDir + "/" + "gbook_messages." + ext, true, true);
+        FileAppender metaAppender = FileUtil.getFileAppender(outputDir + "/" + "gbook_users.meta", true, true);
+        FileAppender messageMetaAppender = FileUtil.getFileAppender(outputDir + "/" + "gbook_messages.meta", true, true);
         for (long i = 0; i < numGBookUsers; i++) {
             generateGBookUser(null);
             appender.appendToFile(visitor.reset().visit(gBookUser).toString());
             int numOfMsg = random.nextInt(2 * avgMsgPerGBookUser + 1);
             generateGBookMessages(gBookUser, messageAppender, numOfMsg, visitor);
         }
+        metaAppender.appendToFile(String.format("IDRange=%1$d:%2$d", partitionStartIdOfGBookUsers, gBookUserId - 1));
+        messageMetaAppender.appendToFile(String.format("IDRange=%1$d:%2$d", partitionStartIdOfGBookMessages, gBookMsgId - 1));
         appender.close();
         messageAppender.close();
+        metaAppender.close();
+        messageMetaAppender.close();
     }
 
     private static void generateChirpUsers(long numChirpUsers, IAppendVisitor visitor, String ext) throws IOException {
         FileAppender messageAppender = FileUtil.getFileAppender(outputDir + "/" + "chirp_messages." + ext, true, true);
+        FileAppender messageMetaAppender = FileUtil.getFileAppender(outputDir + "/" + "chirp_messages.meta", true, true);
         for (long i = 0; i < numChirpUsers; i++) {
             generateChirpUser(null);
             int numOfMsg = random.nextInt(2 * avgMsgPerChirpUser + 1);
             generateChirpMessages(chirpUser, messageAppender, numOfMsg, visitor);
         }
+        messageMetaAppender.appendToFile(String.format("IDRange=%1$d:%2$d", partitionStartIdOfChirpMessages, chirpMsgId - 1));
         messageAppender.close();
+        messageMetaAppender.close();
     }
 
     private static void generateGBookMessages(GleambookUser user, FileAppender appender, int numMsg,
