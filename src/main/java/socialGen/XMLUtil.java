@@ -120,6 +120,16 @@ public class XMLUtil {
         return doc;
     }
 
+    public static void createTargetConfiguration(Configuration conf) {
+        PartitionMetrics metrics = new PartitionMetrics(conf.getSeed(),
+                conf.getStartIdOfGBookUsers(), conf.getStartIdOfGBookMessages(), conf.getNumOfGBookUsers(),
+                conf.getStartIdOfChirpUsers(), conf.getStartIdOfChirpMessages(), conf.getNumOfChirpUsers(),
+                conf.getAvgMsgGBookUser(), conf.getAvgMsgChirpUser(), conf.getSourcePartitions().size());
+        List<TargetPartition> targetPartitions = getTargetPartitions(metrics, conf.getSourcePartitions());
+        conf.setTargetPartitions(targetPartitions);
+        return;
+    }
+
     public static Configuration getConfiguration(String filePath) throws Exception {
         Configuration conf = getConfiguration(getDocument(filePath));
         PartitionMetrics metrics = new PartitionMetrics(conf.getSeed(),
