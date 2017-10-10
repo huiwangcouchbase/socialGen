@@ -280,7 +280,7 @@ public class DataGenerator {
             case JSON:
                 visitor = (keyType == KeyType.LONG ? new JsonAppendVisitor() : new JsonAppendVisitor() {
                     public IAppendVisitor visit(long l) {
-                        builder.append('"').append(l).append('"');
+                        builder.append('"').append(String.format("%015d", l)).append('"');
                         return this;
                     }
                 });
