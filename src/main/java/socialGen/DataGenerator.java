@@ -69,13 +69,15 @@ public class DataGenerator {
     }
 
     private static class OutputDesc {
-        OutputDesc(IAppendVisitor visitor, String extension) {
+        OutputDesc(IAppendVisitor visitor, String extension, String keyFormatString) {
             this.visitor = visitor;
             this.extension = extension;
+            this.keyFormatString = keyFormatString;
         }
 
         IAppendVisitor visitor;
         String extension;
+        String keyFormatString;
     }
 
     private static RandomDateGenerator randDateGen;
@@ -109,7 +111,7 @@ public class DataGenerator {
     private static GleambookMessage gBookMessage = new GleambookMessage();
     private static ChirpMessage chirpMessage = new ChirpMessage();
 
-    private static void generateGbookUsers(long numGBookUsers, IAppendVisitor visitor, String ext) throws IOException {
+    private static void generateGbookUsers(long numGBookUsers, IAppendVisitor visitor, String ext, String keyFormatString) throws IOException {
         FileAppender appender = FileUtil.getFileAppender(outputDir + "/" + "gbook_users." + ext, true, true);
         FileAppender messageAppender = FileUtil.getFileAppender(outputDir + "/" + "gbook_messages." + ext, true, true);
         FileAppender metaAppender = FileUtil.getFileAppender(outputDir + "/" + "gbook_users.meta", true, true);
@@ -122,13 +124,17 @@ public class DataGenerator {
         }
         metaAppender.appendToFile(String.format("IDRange=%1$d:%2$d", partitionStartIdOfGBookUsers, gBookUserId - 1));
         messageMetaAppender.appendToFile(String.format("IDRange=%1$d:%2$d", partitionStartIdOfGBookMessages, gBookMsgId - 1));
+        if (keyFormatString != null) {
+            metaAppender.appendToFile(String.format("IDFormat=%s", keyFormatString));
+            messageMetaAppender.appendToFile(String.format("IDFormat=%s", keyFormatString));
+        }
         appender.close();
         messageAppender.close();
         metaAppender.close();
         messageMetaAppender.close();
     }
 
-    private static void generateChirpUsers(long numChirpUsers, IAppendVisitor visitor, String ext) throws IOException {
+    private static void generateChirpUsers(long numChirpUsers, IAppendVisitor visitor, String ext, String keyFormatString) throws IOException {
         FileAppender messageAppender = FileUtil.getFileAppender(outputDir + "/" + "chirp_messages." + ext, true, true);
         FileAppender messageMetaAppender = FileUtil.getFileAppender(outputDir + "/" + "chirp_messages.meta", true, true);
         for (long i = 0; i < numChirpUsers; i++) {
@@ -137,6 +143,9 @@ public class DataGenerator {
             generateChirpMessages(chirpUser, messageAppender, numOfMsg, visitor);
         }
         messageMetaAppender.appendToFile(String.format("IDRange=%1$d:%2$d", partitionStartIdOfChirpMessages, chirpMsgId - 1));
+        if (keyFormatString != null) {
+            messageMetaAppender.appendToFile(String.format("IDFormat=%s", keyFormatString));
+        }
         messageAppender.close();
         messageMetaAppender.close();
     }
@@ -219,12 +228,12 @@ public class DataGenerator {
 
         outputDir = partition.getSourcePartition().getPath();
         System.out.println("start generating");
-        generateData(od.visitor, od.extension);
+        generateData(od.visitor, od.extension, od.keyFormatString);
     }
 
     private static OutputDesc outputFormat(String[] args) {
         if (args.length < 3) {
-            return new OutputDesc(new ADMAppendVisitor(), EXT_ADM);
+            return new OutputDesc(new ADMAppendVisitor(), EXT_ADM, null);
         }
         int i = 2;
         Output output = Output.ADM;
@@ -273,7 +282,7 @@ public class DataGenerator {
         }
 
         IAppendVisitor visitor;
-        final String keyFormatStr = kfStr;
+        final String keyFormatStr = (keyType == KeyType.STRING) ? kfStr : null;
         switch (output) {
             case ADM:
                 visitor = (keyType == KeyType.LONG ? new ADMAppendVisitor() : new ADMAppendVisitor() {
@@ -282,7 +291,7 @@ public class DataGenerator {
                         return this;
                     }
                 });
-                return new OutputDesc(visitor, EXT_ADM);
+                return new OutputDesc(visitor, EXT_ADM, keyFormatStr);
             case JSON:
                 visitor = (keyType == KeyType.LONG ? new JsonAppendVisitor() : new JsonAppendVisitor() {
                     public IAppendVisitor visit(long l) {
@@ -290,7 +299,7 @@ public class DataGenerator {
                         return this;
                     }
                 });
-                return new OutputDesc(visitor, EXT_JSON);
+                return new OutputDesc(visitor, EXT_JSON, keyFormatStr);
             default:
                 throw new IllegalArgumentException(output.toString());
         }
@@ -305,11 +314,11 @@ public class DataGenerator {
         System.exit(1);
     }
 
-    private static void generateData(IAppendVisitor visitor, String extension) throws IOException {
+    private static void generateData(IAppendVisitor visitor, String extension, String keyFormatString) throws IOException {
         System.out.println("generating number of gbook user " + numOfGBookUsers);
-        generateGbookUsers(numOfGBookUsers, visitor, extension);
+        generateGbookUsers(numOfGBookUsers, visitor, extension, keyFormatString);
         System.out.println("generating number of chirp user " + numOfGBookUsers);
-        generateChirpUsers(numOfChirpUsers, visitor, extension);
+        generateChirpUsers(numOfChirpUsers, visitor, extension, keyFormatString);
         System.out.println("\nData generation in partition " + partition.getTargetPartition().getId() + " finished");
     }
 
