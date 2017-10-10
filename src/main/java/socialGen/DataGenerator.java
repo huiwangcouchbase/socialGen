@@ -229,6 +229,7 @@ public class DataGenerator {
         int i = 2;
         Output output = Output.ADM;
         KeyType keyType = KeyType.LONG;
+        String kfStr = "%d";
         while (i < args.length) {
             String arg = args[i];
             if (!arg.startsWith("-")) {
@@ -252,11 +253,15 @@ public class DataGenerator {
                     if (i + 1 >= args.length) {
                         printUsage("missing parameter for " + arg);
                     }
-                    String keyFormat = args[++i];
+                    String kfParts[] = args[++i].split("#");
+                    String keyFormat = kfParts[0];
                     if (keyFormat.equalsIgnoreCase("long")) {
                         keyType = KeyType.LONG;
                     } else if (keyFormat.equalsIgnoreCase("string")) {
                         keyType = KeyType.STRING;
+                        if (kfParts.length >= 2) {
+                            kfStr = kfParts[1];
+                        }
                     } else {
                         printUsage("Illegal key format " + keyFormat);
                     }
@@ -268,11 +273,12 @@ public class DataGenerator {
         }
 
         IAppendVisitor visitor;
+        final String keyFormatStr = kfStr;
         switch (output) {
             case ADM:
                 visitor = (keyType == KeyType.LONG ? new ADMAppendVisitor() : new ADMAppendVisitor() {
                     public IAppendVisitor visit(long l) {
-                        builder.append('"').append(l).append('"');
+                        builder.append('"').append(String.format(keyFormatStr, l)).append('"');
                         return this;
                     }
                 });
@@ -280,7 +286,7 @@ public class DataGenerator {
             case JSON:
                 visitor = (keyType == KeyType.LONG ? new JsonAppendVisitor() : new JsonAppendVisitor() {
                     public IAppendVisitor visit(long l) {
-                        builder.append('"').append(String.format("%015d", l)).append('"');
+                        builder.append('"').append(String.format(keyFormatStr, l)).append('"');
                         return this;
                     }
                 });
