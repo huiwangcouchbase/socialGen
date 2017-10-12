@@ -1,5 +1,3 @@
-set -x
-
 PARTITIONS=$1
 shift
 CLIENTN=$1
