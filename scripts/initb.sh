@@ -4,10 +4,12 @@ CLIENTN=$1
 shift
 USERDOCS=$1
 shift
+DATAPATH=$1
+shift
 
 mkdir -p "$PWD/output"
 
-java -cp "$PWD/target/SocialGen.jar" socialGen.PreDataGenerator -a "$PWD" $USERDOCS $PARTITIONS $CLIENTN "$PWD/bigfundata"
+java -cp "$PWD/target/SocialGen.jar" socialGen.PreDataGenerator -a "$PWD" $USERDOCS $PARTITIONS $CLIENTN $DATAPATH
 
 for i in `cat $PWD/output/partitions`
 do
