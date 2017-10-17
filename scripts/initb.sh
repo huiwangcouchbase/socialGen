@@ -1,10 +1,10 @@
+DATAPATH=$1
+shift
 PARTITIONS=$1
 shift
 CLIENTN=$1
 shift
 USERDOCS=$1
-shift
-DATAPATH=$1
 shift
 
 mkdir -p "$PWD/output"
