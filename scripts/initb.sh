@@ -7,6 +7,7 @@ shift
 USERDOCS=$1
 shift
 
+rm -r $DATAPATH
 mkdir -p "$PWD/output"
 
 java -cp "$PWD/target/SocialGen.jar" socialGen.PreDataGenerator -a "$PWD" $USERDOCS $PARTITIONS $CLIENTN $DATAPATH
